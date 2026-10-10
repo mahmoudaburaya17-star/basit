@@ -186,6 +186,10 @@ for i, date in enumerate(DATES):
     else:
         _add(date, "F", F_TEXT[i], None, "سهرة")
 
+import batch2  # noqa: E402
+FRIDAYS |= batch2.FRIDAYS
+batch2.build(_add)
+
 POSTS.sort(key=lambda p: (p["date"], p["time"]))
 for n, p in enumerate(POSTS, 1):
     p["id"] = n
