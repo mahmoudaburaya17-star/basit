@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from calendar_data import POSTS as OLD  # noqa: E402
 
 TIMES = {"A": "08:30", "B": "12:30", "C": "15:30", "D": "18:30", "E": "20:30", "F": "22:45"}
+HASHTAGS = "#بسيط #تيشيرت_رجالي #ملابس_رجالي"
 FRIDAY = {"A": "10:00", "B": "14:30", "C": "16:30"}
 
 DATES = ["2026-10-11", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17",
@@ -153,7 +154,8 @@ POSTS = []
 
 def _add(date, slot, text, image=None, pillar=""):
     t = FRIDAY.get(slot, TIMES[slot]) if date in FRIDAYS else TIMES[slot]
-    POSTS.append({"date": date, "time": t, "slot": slot, "pillar": pillar, "text": text.strip(), "image": image})
+    POSTS.append({"date": date, "time": t, "slot": slot, "pillar": pillar,
+                  "text": text.strip() + "\n\n" + HASHTAGS, "image": image})
 
 
 for i, date in enumerate(DATES):
