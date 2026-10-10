@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "content"))
-from calendar_data import POSTS  # noqa: E402
+from schedule import POSTS  # noqa: E402
 
 BRAND = "بسيط"
 TAGLINE = "التيشيرت السادة بالأرقام"
@@ -315,8 +315,46 @@ def t_bignum(spec):
     return img
 
 
+COLORS = {"أبيض": "#F7F5F0", "أسود": "#1C1C1C", "كحلي": "#1F2F4D", "رمادي": "#8D9096", "رمادي غامق": "#4A4D52",
+          "زيتي": "#5B6340", "بيج": "#CDB89A", "بني": "#6B4A33", "سماوي": "#8FB4D6",
+          "جينز غامق": "#2E3F5C", "جينز فاتح": "#7F9BBF"}
+
+
+def pants(d, cx, top, w, h, color, outline=INK):
+    def P(x, y):
+        return (cx + x * w, top + y * h)
+    pts = [(-0.45, 0), (0.45, 0), (0.40, 1.0), (0.04, 1.0), (0.0, 0.30), (-0.04, 1.0), (-0.40, 1.0)]
+    d.polygon([P(*p) for p in pts], fill=color)
+    d.line([P(*p) for p in pts] + [P(*pts[0])], fill=outline, width=3)
+
+
+def t_outfit(spec):
+    img, d = base(spec.get("kicker"))
+    y0 = title_block(d, spec["title"], y=165, max_lines=2, sizes=(74, 68, 62, 56))
+    tee_c = COLORS[spec["tee"]]
+    pan_c = COLORS[spec["pants"]]
+    sho_c = COLORS[spec["shoe_color"]]
+    cx = 300
+    top = y0 + 50
+    tee(d, cx, top, 230, 250, tee_c)
+    pants(d, cx, top + 235, 200, 330, pan_c)
+    # أحذية
+    for dx in (-48, 48):
+        d.rounded_rectangle([cx + dx - 42, top + 235 + 330 - 8, cx + dx + 42, top + 235 + 330 + 32], radius=16,
+                            fill=sho_c, outline=INK, width=3)
+    # قايمة
+    rows = [("التيشيرت", spec["tee"], tee_c), ("البنطلون", spec["pants"], pan_c), ("الحذاء", spec["shoe"], sho_c)]
+    y = y0 + 90
+    for label, name, col in rows:
+        d.text((W - MARGIN, y), label, font=font(34, False), fill=MUTED, anchor="ra", **LANG)
+        d.ellipse([W - MARGIN - 560, y + 72, W - MARGIN - 520, y + 112], fill=col, outline=INK, width=3)
+        d.text((W - MARGIN - 36, y + 70), name, font=font(46), fill=INK, anchor="ra", **LANG)
+        y += 170
+    return img
+
+
 TEMPLATES = {"statement": t_statement, "list": t_list, "compare": t_compare, "poll": t_poll,
-             "ladder": t_ladder, "swatch": t_swatch, "fits": t_fits, "qa": t_qa, "bignum": t_bignum}
+             "ladder": t_ladder, "swatch": t_swatch, "fits": t_fits, "qa": t_qa, "bignum": t_bignum, "outfit": t_outfit}
 
 
 def main():
@@ -327,10 +365,10 @@ def main():
         spec = p["image"]
         name = None
         if spec:
-            name = "post-%02d.png" % p["id"]
+            name = "%s-%s.png" % (p["date"], p["slot"])
             img = TEMPLATES[spec["t"]](spec)
             img.save(os.path.join(out, name), optimize=True)
-        manifest.append({**{k: p[k] for k in ("id", "date", "time", "pillar", "text")},
+        manifest.append({**{k: p[k] for k in ("id", "date", "time", "slot", "pillar", "text")},
                          "image": ("images/" + name) if name else None,
                          "alt": (spec.get("title") if spec else None)})
     if len(sys.argv) <= 1:
