@@ -167,11 +167,15 @@ for i, date in enumerate(DATES):
     if c["t"] == "qa":
         c_text = "💡 معلومة في كارت:\n" + c["q"] + "\n\n" + c["a"]
     else:
-        c_text = "💡 معلومة في كارت:\n" + c["title"] + "\n\nاحفظ البوست لو شايفه مفيد. 📌"
+        if c["t"] == "list":
+            body = "\n".join(("%d. %s" % (n, it)) if c.get("numbered") else ("• " + it) for n, it in enumerate(c["items"], 1))
+        else:
+            body = "\n\n".join("%s:\n%s" % (h, "\n".join("• " + x for x in its)) for h, its in (c["left"], c["right"]))
+        c_text = "💡 معلومة في كارت:\n" + c["title"] + "\n\n" + body + "\n\nاحفظ البوست لو شايفه مفيد. 📌"
     _add(date, "C", c_text, c, "تعليم")
     occ, tee, pants, shoe_c, shoe = D[i]
     d_img = {"t": "outfit", "kicker": "ستايل", "title": occ, "tee": tee, "pants": pants, "shoe_color": shoe_c, "shoe": shoe}
-    _add(date, "D", "👕 ستايل اليوم: %s\n\nتيشيرت %s + بنطلون %s + %s.\nأنهي مناسبة من دول بتلبس فيها كده؟" % (occ, tee, pants, shoe), d_img, "ستايل")
+    _add(date, "D", "👕 ستايل اليوم: %s\n\nتيشيرت %s + بنطلون %s + %s.\nجرّبت التنسيق ده قبل كده؟" % (occ, tee, pants, shoe), d_img, "ستايل")
     e = OLD[i + 1]
     _add(date, "E", e["text"], e["image"], e["pillar"])
     if i in F_QUIZ:
