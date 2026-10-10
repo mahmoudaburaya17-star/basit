@@ -26,13 +26,21 @@ MUTED = "#6B645A"
 ACCENT = "#C8553D"
 OLIVE = "#3C5A4A"
 
-FONT_B = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-FONT_R = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+FONT_PATH = os.path.join(ROOT, "fonts", "Cairo.ttf")  # Cairo (OFL)
+W_BOLD, W_REG = 800, 500
 LANG = dict(direction="rtl", language="ar")
 
 
+_cache = {}
+
+
 def font(size, bold=True):
-    return ImageFont.truetype(FONT_B if bold else FONT_R, size, layout_engine=ImageFont.Layout.RAQM)
+    key = (size, bold)
+    if key not in _cache:
+        f = ImageFont.truetype(FONT_PATH, size, layout_engine=ImageFont.Layout.RAQM)
+        f.set_variation_by_axes([W_BOLD if bold else W_REG, 0])
+        _cache[key] = f
+    return _cache[key]
 
 
 _tmp = ImageDraw.Draw(Image.new("RGB", (10, 10)))
@@ -68,7 +76,7 @@ def fit_lines(text, maxw, max_lines, sizes, bold=True):
 
 def draw_lines(d, lines, f, x_right, y, fill, lh):
     for ln in lines:
-        d.text((x_right, y), ln, font=f, fill=fill, anchor="ra", **LANG)
+        d.text((x_right, y - int(f.size * 0.2)), ln, font=f, fill=fill, anchor="ra", **LANG)
         y += lh
     return y
 
@@ -94,7 +102,7 @@ def title_block(d, title, y=170, maxw=W - 2 * MARGIN, max_lines=3, sizes=(84, 76
     f, lines, s = fit_lines(title, maxw, 1, [z for z in sizes if z >= 60] or sizes)
     if len(lines) != 1:
         f, lines, s = fit_lines(title, maxw, max_lines, sizes)
-    lh = int(s * 1.35)
+    lh = int(s * 1.4)
     y = draw_lines(d, lines, f, W - MARGIN, y, INK, lh)
     return y
 
@@ -123,11 +131,11 @@ def badge(d, cx, cy, n, r=34):
 def t_statement(spec):
     img, d = base(spec.get("kicker"))
     f, lines, s = fit_lines(spec["title"], W - 2 * MARGIN, 4, (110, 98, 90, 80, 70))
-    lh = int(s * 1.35)
+    lh = int(s * 1.45)
     total = lh * len(lines)
     y = 235
     draw_lines(d, lines, f, W - MARGIN, y, INK, lh)
-    ay = y + total + 30
+    ay = y + total + 20
     d.rectangle([W - MARGIN - 160, ay, W - MARGIN, ay + 10], fill=ACCENT)
     y_end = ay + 30
     if spec.get("sub"):
@@ -149,7 +157,7 @@ def t_list(spec):
         f = font(s, False)
         maxw = W - 2 * MARGIN - 110
         blocks = [wrap(it, f, maxw) for it in items]
-        lh = int(s * 1.4)
+        lh = int(s * 1.5)
         gap = int(s * 0.7)
         total = sum(len(b) * lh for b in blocks) + gap * (len(blocks) - 1)
         if total <= avail_bot - avail_top:
@@ -223,13 +231,13 @@ def t_ladder(spec):
     maxw = W - 2 * MARGIN
     pf = font(38)
     for (label, price, frac), col in zip(rows, colors):
-        d.text((W - MARGIN, y), label, font=font(40), fill=INK, anchor="ra", **LANG)
-        y += 58
+        d.text((W - MARGIN, y - 8), label, font=font(40), fill=INK, anchor="ra", **LANG)
+        y += 74
         need = int(tw(price, pf)) + 56
         bw = max(need, int(maxw * frac))
         d.rounded_rectangle([W - MARGIN - bw, y, W - MARGIN, y + 74], radius=20, fill=col)
         d.text((W - MARGIN - 28, y + 37), price, font=pf, fill="white", anchor="rm", **LANG)
-        y += 74 + 34
+        y += 74 + 22
     if spec.get("note"):
         nf, nl, ns = fit_lines(spec["note"], W - 2 * MARGIN, 1, (28, 26, 24), bold=False)
         draw_lines(d, nl, nf, W - MARGIN, H - 150, MUTED, 36)
@@ -312,7 +320,7 @@ TEMPLATES = {"statement": t_statement, "list": t_list, "compare": t_compare, "po
 
 
 def main():
-    out = os.path.join(ROOT, "images")
+    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "images")
     os.makedirs(out, exist_ok=True)
     manifest = []
     for p in POSTS:
@@ -325,8 +333,9 @@ def main():
         manifest.append({**{k: p[k] for k in ("id", "date", "time", "pillar", "text")},
                          "image": ("images/" + name) if name else None,
                          "alt": (spec.get("title") if spec else None)})
-    with open(os.path.join(ROOT, "content", "calendar.json"), "w", encoding="utf-8") as fh:
-        json.dump(manifest, fh, ensure_ascii=False, indent=2)
+    if len(sys.argv) <= 1:
+        with open(os.path.join(ROOT, "content", "calendar.json"), "w", encoding="utf-8") as fh:
+            json.dump(manifest, fh, ensure_ascii=False, indent=2)
     print("images:", sum(1 for m in manifest if m["image"]), "posts:", len(manifest))
 
 
