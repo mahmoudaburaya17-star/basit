@@ -365,12 +365,13 @@ def main():
         spec = p["image"]
         name = None
         if spec:
-            name = "%s-%s.png" % (p["date"], p["slot"])
+            name = "%s.png" % p["image_key"]
             img = TEMPLATES[spec["t"]](spec)
             img.save(os.path.join(out, name), optimize=True)
         manifest.append({**{k: p[k] for k in ("id", "date", "time", "slot", "pillar", "text")},
                          "image": ("images/" + name) if name else None,
-                         "alt": (spec.get("title") if spec else None)})
+                         "alt": (spec.get("title") if spec else None),
+                         **{k: p[k] for k in ("video", "video_cover", "moved_from") if p.get(k)}})
     if len(sys.argv) <= 1:
         with open(os.path.join(ROOT, "content", "calendar.json"), "w", encoding="utf-8") as fh:
             json.dump(manifest, fh, ensure_ascii=False, indent=2)

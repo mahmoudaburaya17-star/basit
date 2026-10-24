@@ -17,9 +17,9 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from calendar_data import POSTS as OLD  # noqa: E402
 
-TIMES = {"A": "08:30", "B": "12:30", "C": "15:30", "D": "18:30", "E": "20:30", "F": "22:45"}
+TIMES = {"A": "08:30", "B": "12:30", "C": "15:30", "D": "18:30", "E": "20:30", "F": "22:45", "R": "15:30", "G": "11:00"}
 HASHTAGS = "#بسيط #تيشيرت_رجالي #ملابس_رجالي"
-FRIDAY = {"A": "10:00", "B": "14:30", "C": "16:30"}
+FRIDAY = {"A": "10:00", "B": "14:30", "C": "16:30", "R": "16:30", "G": "10:00"}
 
 DATES = ["2026-10-11", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17",
          "2026-10-18", "2026-10-19", "2026-10-20", "2026-10-21", "2026-10-22", "2026-10-23", "2026-10-24"]
@@ -152,10 +152,13 @@ F_QUIZ = {
 POSTS = []
 
 
-def _add(date, slot, text, image=None, pillar=""):
+def _add(date, slot, text, image=None, pillar="", **extra):
     t = FRIDAY.get(slot, TIMES[slot]) if date in FRIDAYS else TIMES[slot]
-    POSTS.append({"date": date, "time": t, "slot": slot, "pillar": pillar,
-                  "text": text.strip() + "\n\n" + HASHTAGS, "image": image})
+    post = {"date": date, "time": t, "slot": slot, "pillar": pillar,
+            "text": text.strip() + "\n\n" + HASHTAGS, "image": image, "image_key": "%s-%s" % (date, slot)}
+    post.update(extra)
+    POSTS.append(post)
+    return post
 
 
 for i, date in enumerate(DATES):
@@ -189,6 +192,20 @@ for i, date in enumerate(DATES):
 import batch2  # noqa: E402
 FRIDAYS |= batch2.FRIDAYS
 batch2.build(_add)
+
+# ---- نقل بوستات الكروت (استبدلها ريلز) والبوستات الفايتة يوم 24 أكتوبر لوقت تاني: 11:00 صباحًا من 8 نوفمبر
+import datetime  # noqa: E402
+
+_moved = [p for p in POSTS if p["date"] == "2026-10-24" and p["time"] < "22:45"]
+_moved += [p for p in POSTS if p["slot"] == "C" and p["date"] in batch2.DATES]
+_moved.sort(key=lambda p: (p["date"], p["time"]))
+_d = datetime.date(2026, 11, 8)
+for _p in _moved:
+    _p["moved_from"] = "%s %s" % (_p["date"], _p["time"])
+    _p["date"] = _d.isoformat()
+    _p["slot"] = "G"
+    _p["time"] = FRIDAY["G"] if _d.weekday() == 4 else TIMES["G"]
+    _d += datetime.timedelta(days=1)
 
 POSTS.sort(key=lambda p: (p["date"], p["time"]))
 for n, p in enumerate(POSTS, 1):

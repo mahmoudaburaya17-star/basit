@@ -171,6 +171,14 @@ F_QUIZ = {
 }
 
 
+SPECIAL_VIDEOS = {3: "gsm-in-20s", 7: "measure-your-size", 11: "right-wash"}
+REEL_TEXTS = {
+    "gsm-in-20s": "🎬 يعني إيه GSM في التيشيرت؟ في 20 ثانية.\n\nGSM = وزن القماش بالجرام لكل متر مربع. الرقم الأعلى مش دايمًا الأحسن، بيعتمد على الجو والقصة اللي عايزها.\n\nاحفظ الفيديو وابعته لصاحبك اللي بيشتري تيشيرتات. 📌",
+    "measure-your-size": "🎬 إزاي تعرف مقاسك من غير جدول؟ في 4 خطوات.\n\nالأرقام في الفيديو أمثلة للتوضيح. قيس تيشيرت ماشي عليك وقارنه بأرقام أي براند.\n\nاحفظ الفيديو، هيفيدك مع أي براند. 📌",
+    "right-wash": "🎬 الغسيل الصح للتيشيرت في 4 خطوات.\n\nاقلبه من جوه، مية باردة أو فاترة، منظف بكمية قليلة، وانشره مفرود في الظل. الانكماش بيختلف حسب الخامة، بس الغسيل الصح بيقلله.\n\nإنت بتغسل تيشيرتاتك كده؟ 👇",
+}
+
+
 def build(add):
     for i, date in enumerate(DATES):
         add(date, "A", A[i], None, "نصيحة")
@@ -188,7 +196,13 @@ def build(add):
             else:
                 body = "\n\n".join("%s:\n%s" % (h, "\n".join("• " + x for x in its)) for h, its in (c["left"], c["right"]))
             c_text = "💡 معلومة في كارت:\n" + c["title"] + "\n\n" + body + "\n\nاحفظ البوست لو شايفه مفيد. 📌"
-        add(date, "C", c_text, c, "تعليم")
+        add(date, "C", c_text, c, "تعليم")  # الكارت (هيتنقل لوقت تاني في schedule.py)
+        reel_text = c_text.replace("💡 معلومة في كارت:", "🎬").replace("احفظ البوست", "احفظ الفيديو")
+        vname = SPECIAL_VIDEOS.get(i)
+        if vname:
+            reel_text = REEL_TEXTS[vname]
+        add(date, "R", reel_text, None, "ريلز", video="videos/%s.mp4" % (vname or ("%s-reel" % date)),
+            video_cover=("videos/%s-cover.png" % vname) if vname else None, card=c)
         occ, tee, pants, shoe_c, shoe = D[i]
         d_img = {"t": "outfit", "kicker": "ستايل", "title": occ, "tee": tee, "pants": pants, "shoe_color": shoe_c, "shoe": shoe}
         add(date, "D", "👕 ستايل اليوم: %s\n\nتيشيرت %s + بنطلون %s + %s.\nجرّبت التنسيق ده قبل كده؟" % (occ, tee, pants, shoe), d_img, "ستايل")

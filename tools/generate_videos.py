@@ -247,6 +247,94 @@ def v_wash(f, t):
         f.text("احفظ الفيديو وابعته لصاحبك", VW - MARGIN, 1200, 48, MUTED, False, prog(s, 14.4))
 
 
+# ------------------- فيديوهات مولّدة من مواصفات الكروت (qa / list / compare) -------------------
+
+W_ = VW - 2 * MARGIN
+RX = VW - MARGIN
+
+
+def _end(f, t, t0):
+    f.rect([0, 26, VW, VH - 340], BG, min(1.0, (t - t0) / 0.4))
+    s = t - t0
+    f.text("تابع بسيط", RX, 640, 120, INK, True, prog(s, 0.3))
+    f.text("للمعلومات اللي بتفيدك قبل ما تشتري", RX, 820, 52, MUTED, False, prog(s, 0.7))
+    f.text("احفظ الفيديو وابعته لصاحبك", RX, 920, 52, ACCENT, True, prog(s, 1.1))
+
+
+def _intro(f, t, spec):
+    f.kicker(spec["kicker"], prog(t, 0.0))
+    f.paragraph(spec["title"], RX, 520, 112, W_, INK, True, prog(t, 0.3), lh=1.35)
+
+
+def dur_card(spec):
+    n = len(spec["items"]) if spec["t"] == "list" else 0
+    if spec["t"] == "list":
+        return 3.2 + n * 2.7 + 2.0 + 3.5
+    if spec["t"] == "qa":
+        return 3.2 + 4.5 + 9.5 + 3.5
+    return 3.2 + 6.0 + 6.0 + 2.0 + 3.5
+
+
+def make_card_video(spec):
+    total = dur_card(spec)
+
+    def fn(f, t):
+        end0 = total - 3.5
+        if t >= end0:
+            f.kicker(spec["kicker"], 1.0)
+            _end(f, t, end0)
+            return
+        if t < 3.2:
+            _intro(f, t, spec)
+            return
+        f.kicker(spec["kicker"], 1.0)
+        s = t - 3.2
+        if spec["t"] == "list":
+            f.paragraph(spec["title"], RX, 290, 64, W_, ACCENT, True, 1.0, lh=1.3)
+            y = 560
+            for i, it in enumerate(spec["items"]):
+                t0 = i * 2.7
+                p = prog(s, t0, 0.6)
+                if p > 0:
+                    f.rect([MARGIN, y, VW - MARGIN, y + 220], "#FFFFFF", p, 28)
+                    f.badge(RX - 70, y + 110, i + 1, p)
+                    f.paragraph(it, RX - 160, y + 52, 50, W_ - 200, INK, True, p, lh=1.3)
+                y += 250
+        elif spec["t"] == "qa":
+            if s < 4.5:
+                f.text("سؤال", RX, 330, 60, ACCENT, True, prog(s, 0.0))
+                f.paragraph(spec["q"], RX, 450, 84, W_, INK, True, prog(s, 0.3), lh=1.35)
+            else:
+                s2 = s - 4.5
+                f.text("الإجابة", RX, 330, 60, ACCENT, True, prog(s2, 0.0))
+                f.paragraph(spec["a"], RX, 450, 56, W_, INK, True, prog(s2, 0.3), lh=1.5)
+        else:
+            f.paragraph(spec["title"], RX, 290, 64, W_, INK, True, 1.0, lh=1.3)
+            for k, (key, col) in enumerate((("left", OLIVE), ("right", ACCENT))):
+                t0 = k * 6.0
+                p = prog(s, t0, 0.6)
+                if p <= 0:
+                    continue
+                head, items = spec[key]
+                y0 = 520 + k * 520
+                f.rect([MARGIN, y0, VW - MARGIN, y0 + 470], "#FFFFFF", p, 28)
+                f.rect([MARGIN, y0, VW - MARGIN, y0 + 110], col, p, 28)
+                f.text(head, RX - 40, y0 + 20, 64, "#FFFFFF", True, p)
+                for j, it in enumerate(items[:3]):
+                    f.text("•  " + it, RX - 40, y0 + 150 + j * 100, 46, INK, True, prog(s, t0 + 0.6 + j * 0.9, 0.5))
+
+    return fn, total
+
+
+def register_cards():
+    sys.path.insert(0, os.path.join(ROOT, "content"))
+    import batch2
+    for i, (date, spec) in enumerate(zip(batch2.DATES, batch2.C)):
+        if i in batch2.SPECIAL_VIDEOS:
+            continue
+        VIDEOS["%s-reel" % date] = make_card_video(spec)
+
+
 VIDEOS = {
     "gsm-in-20s": (v_gsm, 21.0),
     "measure-your-size": (v_size_wrap, 26.0),
@@ -277,6 +365,8 @@ def render(name):
     proc.wait()
     print("done", out, "%.1fs" % dur)
 
+
+register_cards()
 
 if __name__ == "__main__":
     names = sys.argv[1:] or list(VIDEOS)
