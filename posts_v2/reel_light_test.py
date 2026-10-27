@@ -7,7 +7,7 @@ from v2 import C, Canvas, prog
 from PIL import Image, ImageDraw, ImageFilter
 
 W, H, FPS = 1080, 1920, 30
-DUR = 26.0
+DUR = 27.0
 R = W - 80
 _glow = None
 
@@ -72,15 +72,15 @@ def frame(t):
             c.paste_icon(ic[key], cx, 1210, p)
             c.paste_icon(ic["ok" if good else "no"], cx + 160, 1040, p)
             c.text(lab, cx, 1430, 42, C["sage"] if good else C["acc"], True, alpha=p, anchor="ma")
-    elif t < 22.0:
+    elif t < 23.0:
         s = t - 17.5
         pill(c, "النتيجة", s)
-        c.block("الفراغات كبيرة؟", R, 520, 100, 900, C["acc"], t=s, t0=0.3, step=0.28, lh=1.3)
-        c.block("القماش هيبان على الجلد وهيحسسك بتعب في الصيف.", R, 720, 54, 900, C["cream"], False, t=s, t0=1.2, step=0.15)
-        c.block("نسيج كثيف ومنتظم؟", R, 1040, 100, 900, C["sage"], t=s, t0=2.2, step=0.28, lh=1.3)
-        c.block("غالبًا مريح وساتر أكتر.", R, 1240, 54, 900, C["cream"], False, t=s, t0=3.1, step=0.15)
+        y = c.block("الفراغات كبيرة؟", R, 460, 92, 920, C["acc"], t=s, t0=0.3, step=0.28, lh=1.3)
+        y = c.block("القماش هيبان على الجلد وهيحسسك بتعب في الصيف.", R, y + 20, 52, 920, C["cream"], False, t=s, t0=1.2, step=0.15)
+        y = c.block("نسيج كثيف ومنتظم؟", R, y + 110, 92, 920, C["sage"], t=s, t0=2.6, step=0.28, lh=1.3)
+        c.block("غالبًا مريح وساتر أكتر.", R, y + 20, 52, 920, C["cream"], False, t=s, t0=3.4, step=0.15)
     else:
-        s = t - 22.0
+        s = t - 23.0
         c.block("جرّب دلوقتي", R, 600, 128, 900, t=s, t0=0.2, step=0.3, lh=1.25)
         c.block("وقولنا النتيجة في التعليقات", R, 860, 60, 900, C["acc2"], t=s, t0=1.0, step=0.2)
         c.rrect([R - 520, 1100, R, 1260], C["card"], 40, alpha=prog(s, 1.8), outline=C["line"])
