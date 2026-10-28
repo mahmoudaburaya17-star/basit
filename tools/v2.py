@@ -301,3 +301,143 @@ def sun_icon(w=380, h=300):
         a = i / 12 * 2 * math.pi
         d.line([(cx + math.cos(a) * 74 * S, cy + math.sin(a) * 74 * S), (cx + math.cos(a) * 112 * S, cy + math.sin(a) * 112 * S)], fill=rgb("#F2B36B"), width=int(8 * S))
     return finish(im)
+
+
+# ---------------- أيقونات إضافية ----------------
+def _p(w=380, h=300):
+    im = icon_canvas(w, h)
+    return im, ImageDraw.Draw(im), w * S, h * S
+
+
+def drop_icon(w=380, h=300, col="#7FB7C9"):
+    im, d, W_, H_ = _p(w, h)
+    cx, cy = W_ / 2, H_ * 0.58
+    r = H_ * 0.26
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=rgb(col))
+    d.polygon([(cx, cy - r * 2.05), (cx - r * 0.93, cy - r * 0.35), (cx + r * 0.93, cy - r * 0.35)], fill=rgb(col))
+    d.ellipse([cx - r * 0.55, cy - r * 0.2, cx - r * 0.2, cy + r * 0.3], fill=rgb("#FFFFFF", 90))
+    return finish(im)
+
+
+def tape_icon(w=380, h=300):
+    im, d, W_, H_ = _p(w, h)
+    d.rounded_rectangle([W_ * 0.06, H_ * 0.38, W_ * 0.94, H_ * 0.62], radius=14 * S, fill=rgb("#F2B36B"))
+    for i in range(0, 31):
+        x = W_ * 0.09 + i * (W_ * 0.82 / 30)
+        ln = H_ * (0.12 if i % 5 == 0 else 0.07)
+        d.line([(x, H_ * 0.38), (x, H_ * 0.38 + ln)], fill=rgb("#4A3A22"), width=int(2.5 * S))
+    return finish(im)
+
+
+def hanger_icon(w=380, h=300):
+    im, d, W_, H_ = _p(w, h)
+    cx = W_ / 2
+    d.arc([cx - W_ * 0.05, H_ * 0.12, cx + W_ * 0.05 + W_ * 0.04, H_ * 0.34], 180, 450, fill=rgb("#CFC6B3"), width=int(8 * S))
+    d.line([(cx + W_ * 0.04, H_ * 0.33), (cx + W_ * 0.04, H_ * 0.42)], fill=rgb("#CFC6B3"), width=int(8 * S))
+    d.line([(cx + W_ * 0.04, H_ * 0.42), (cx - W_ * 0.36, H_ * 0.8)], fill=rgb("#CFC6B3"), width=int(9 * S))
+    d.line([(cx + W_ * 0.04, H_ * 0.42), (cx + W_ * 0.44, H_ * 0.8)], fill=rgb("#CFC6B3"), width=int(9 * S))
+    d.line([(cx - W_ * 0.36, H_ * 0.8), (cx + W_ * 0.44, H_ * 0.8)], fill=rgb("#CFC6B3"), width=int(9 * S))
+    return finish(im)
+
+
+def iron_icon(w=380, h=300):
+    im, d, W_, H_ = _p(w, h)
+    pts = [(W_ * 0.12, H_ * 0.72), (W_ * 0.88, H_ * 0.72), (W_ * 0.80, H_ * 0.52), (W_ * 0.55, H_ * 0.40), (W_ * 0.22, H_ * 0.46)]
+    d.polygon(pts, fill=rgb("#CFC6B3"))
+    d.rounded_rectangle([W_ * 0.12, H_ * 0.72, W_ * 0.88, H_ * 0.80], radius=8 * S, fill=rgb("#8DB59C"))
+    d.arc([W_ * 0.25, H_ * 0.14, W_ * 0.62, H_ * 0.52], 200, 340, fill=rgb("#E6784F"), width=int(14 * S))
+    for i in range(3):
+        x = W_ * (0.30 + i * 0.18)
+        d.line([(x, H_ * 0.84), (x + W_ * 0.04, H_ * 0.94)], fill=rgb("#A9B3A9"), width=int(4 * S))
+    return finish(im)
+
+
+def tag_icon(w=380, h=300):
+    im, d, W_, H_ = _p(w, h)
+    d.polygon([(W_ * 0.28, H_ * 0.18), (W_ * 0.72, H_ * 0.18), (W_ * 0.78, H_ * 0.30), (W_ * 0.78, H_ * 0.86), (W_ * 0.22, H_ * 0.86), (W_ * 0.22, H_ * 0.30)], fill=rgb("#E8E1D2"))
+    d.ellipse([W_ * 0.46, H_ * 0.23, W_ * 0.54, H_ * 0.31], fill=rgb("#18251E"))
+    for i, ln in enumerate((0.34, 0.26, 0.30, 0.22)):
+        y = H_ * (0.42 + i * 0.1)
+        d.line([(W_ * 0.30, y), (W_ * (0.30 + ln), y)], fill=rgb("#8A826F"), width=int(6 * S))
+    return finish(im)
+
+
+def thermo_icon(w=380, h=300, level=0.5, col="#E6784F"):
+    im, d, W_, H_ = _p(w, h)
+    cx = W_ / 2
+    d.rounded_rectangle([cx - W_ * 0.05, H_ * 0.08, cx + W_ * 0.05, H_ * 0.72], radius=int(W_ * 0.05), fill=rgb("#E8E1D2"))
+    d.ellipse([cx - W_ * 0.11, H_ * 0.62, cx + W_ * 0.11, H_ * 0.62 + W_ * 0.22], fill=rgb("#E8E1D2"))
+    top = H_ * (0.70 - 0.55 * level)
+    d.rounded_rectangle([cx - W_ * 0.025, top, cx + W_ * 0.025, H_ * 0.72], radius=int(W_ * 0.025), fill=rgb(col))
+    d.ellipse([cx - W_ * 0.08, H_ * 0.65, cx + W_ * 0.08, H_ * 0.65 + W_ * 0.16], fill=rgb(col))
+    for i in range(5):
+        y = H_ * (0.14 + i * 0.1)
+        d.line([(cx + W_ * 0.08, y), (cx + W_ * 0.14, y)], fill=rgb("#A9B3A9"), width=int(3 * S))
+    return finish(im)
+
+
+def fold_icon(w=380, h=300):
+    im, d, W_, H_ = _p(w, h)
+    cols = ["#E8E1D2", "#CFC6B3", "#8DB59C"]
+    for i, c in enumerate(cols):
+        y = H_ * (0.58 - i * 0.2)
+        d.rounded_rectangle([W_ * 0.2, y, W_ * 0.8, y + H_ * 0.17], radius=12 * S, fill=rgb(c))
+        d.line([(W_ * 0.2 + 18 * S, y + H_ * 0.085), (W_ * 0.8 - 18 * S, y + H_ * 0.085)], fill=rgb("#18251E", 60), width=int(2 * S))
+    return finish(im)
+
+
+def cotton_icon(w=380, h=300):
+    im, d, W_, H_ = _p(w, h)
+    cx, cy = W_ / 2, H_ * 0.42
+    for dx, dy in ((-0.1, 0.04), (0.1, 0.04), (0, -0.08), (-0.05, 0.1), (0.05, 0.1), (0, 0.02)):
+        r = W_ * 0.11
+        d.ellipse([cx + dx * W_ - r, cy + dy * H_ - r, cx + dx * W_ + r, cy + dy * H_ + r], fill=rgb("#F3ECDD"))
+    d.polygon([(cx - W_ * 0.16, cy + H_ * 0.12), (cx + W_ * 0.16, cy + H_ * 0.12), (cx + W_ * 0.1, cy + H_ * 0.34), (cx - W_ * 0.1, cy + H_ * 0.34)], fill=rgb("#5E8A6E"))
+    d.line([(cx, cy + H_ * 0.34), (cx, H_ * 0.92)], fill=rgb("#5E8A6E"), width=int(8 * S))
+    return finish(im)
+
+
+def stack_icon(w=380, h=300):
+    return fold_icon(w, h)
+
+
+def clock_icon(w=380, h=300):
+    im, d, W_, H_ = _p(w, h)
+    cx, cy, r = W_ / 2, H_ / 2, H_ * 0.36
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=rgb("#E8E1D2"))
+    d.line([(cx, cy), (cx, cy - r * 0.65)], fill=rgb("#18251E"), width=int(8 * S))
+    d.line([(cx, cy), (cx + r * 0.45, cy + r * 0.2)], fill=rgb("#E6784F"), width=int(8 * S))
+    return finish(im)
+
+
+def sunglow_icon(w=380, h=300):
+    return sun_icon(w, h)
+
+
+def icon(name, w=380, h=300):
+    """سجل الأيقونات بالاسم: بيرجّع صورة RGBA بمقاس تقريبي w×h."""
+    R = {
+        "tee": lambda: tee_icon(min(w, 360), min(h, 300)),
+        "sun": lambda: sun_icon(w, h),
+        "weave_open": lambda: weave_icon(w, h, 9),
+        "weave_dense": lambda: weave_icon(w, h, 26),
+        "collar_bad": lambda: collar_icon(w, h, True),
+        "collar_good": lambda: collar_icon(w, h, False),
+        "seam_bad": lambda: seam_icon(w, h, False),
+        "seam_good": lambda: seam_icon(w, h, True),
+        "hem_bad": lambda: hem_icon(w, h, False),
+        "hem_good": lambda: hem_icon(w, h, True),
+        "surf_bad": lambda: surface_icon(w, h, False),
+        "surf_good": lambda: surface_icon(w, h, True),
+        "drop": lambda: drop_icon(w, h),
+        "tape": lambda: tape_icon(w, h),
+        "hanger": lambda: hanger_icon(w, h),
+        "iron": lambda: iron_icon(w, h),
+        "tag": lambda: tag_icon(w, h),
+        "thermo_low": lambda: thermo_icon(w, h, 0.35, "#7FB7C9"),
+        "thermo_high": lambda: thermo_icon(w, h, 0.9, "#E6784F"),
+        "fold": lambda: fold_icon(w, h),
+        "cotton": lambda: cotton_icon(w, h),
+        "clock": lambda: clock_icon(w, h),
+    }
+    return R[name]()
