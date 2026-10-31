@@ -68,7 +68,7 @@ def myth_card(spec):
     c.text("؟", 150, 160, 340, C["line"], True)
     c.block(spec["statement"], R, 360, 88, 900, lh=1.4)
     c.rrect([80, 1090, R, 1210], C["card"], 30, outline=C["line"])
-    c.text("جاوب في التعليقات والإجابة في أول تعليق", W // 2, 1118, 40, C["acc2"], True, anchor="ma")
+    c.text("جاوب في التعليقات وبعدين اقرا الإجابة", W // 2, 1118, 40, C["acc2"], True, anchor="ma")
     return c.img.convert("RGB")
 
 

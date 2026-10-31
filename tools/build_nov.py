@@ -36,10 +36,13 @@ def build_cards():
         p = os.path.join(OUT, date + "-M.jpg")
         fn = dict(poll=e.poll_card, myth=e.myth_card, stat=e.stat_card)[m["kind"]]
         fn(m).save(p, quality=90, optimize=True)
-        item = dict(date=date, time=times["M"], slot="M", kind="image", images=["nov/%s-M.jpg" % date],
-                    text=m["cap"] + "\n\n" + HASH, alt=m.get("question") or m.get("statement") or m.get("caption"))
+        text = m["cap"] + "\n\n" + HASH
         if m.get("answer"):
-            item["first_comment"] = m["answer"]
+            # الإجابة جوه الكابشن بعد سطور فاضية (Buffer المجاني مش بيدعم أول تعليق)
+            text = ("صح ولا غلط؟ جاوب في التعليقات الأول. 👇\n\nالإجابة تحت بعد ما تجاوب\n.\n.\n.\n.\n.\n.\n"
+                    + m["answer"] + "\n\n" + HASH)
+        item = dict(date=date, time=times["M"], slot="M", kind="image", images=["nov/%s-M.jpg" % date],
+                    text=text, alt=m.get("question") or m.get("statement") or m.get("caption"))
         cal.append(item)
         # كاروسيل
         c = d["car"]
