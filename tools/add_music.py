@@ -21,7 +21,7 @@ for i, f in enumerate(files):
         wav, out = os.path.join(td, "m.wav"), os.path.join(td, "o.mp4")
         mm.write(wav, mm.make(dur, seed=i))
         subprocess.check_call(["ffmpeg", "-loglevel", "error", "-y", "-i", f, "-i", wav, "-map", "0:v:0", "-map", "1:a:0", "-c:v", "copy",
-                               "-c:a", "aac", "-b:a", "160k", "-af", "volume=0.7", "-shortest",
+                               "-c:a", "aac", "-b:a", "160k", "-af", "volume=0.55", "-shortest",
                                "-movflags", "+faststart", out])
         os.replace(out, f)
     print("music added", os.path.basename(f), "%.1fs" % dur)

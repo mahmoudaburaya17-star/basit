@@ -231,7 +231,7 @@ def draw_scene(c, sc, s, series):
         c.text("تابع بسيط", R - 40, 1135, 76, C["cream"], True, alpha=prog(s, 1.8))
 
 
-def render_reel(spec, out, seed=0, volume=0.7, cover_at=2.6):
+def render_reel(spec, out, seed=0, volume=0.55, cover_at=2.6):
     total = reel_duration(spec)
     tmp = out + ".silent.mp4"
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", "%dx%d" % (RW, RH),
