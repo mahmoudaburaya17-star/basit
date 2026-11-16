@@ -198,6 +198,9 @@ def bubble(st, text, cx, cy, p, tail=(0, 80), size=50, w=None):
     s = back(p)
     from generate_images import tw
     wd = (w or (tw(text, font(size, True)) + 90)) * s
+    cx0 = cx
+    cx = min(max(cx, wd / 2 + 24), W - wd / 2 - 24)
+    tail = (tail[0] + (cx0 - cx), tail[1])
     h = (size * 1.9) * s
     x0, x1, y0, y1 = cx - wd / 2, cx + wd / 2, cy - h / 2, cy + h / 2
     st.rr(x0, y0, x1, y1, 38 * s, fill="#F6F0E2", outline="#D9CDB3", width=5)
@@ -345,7 +348,7 @@ def washer_scene(t):
             mascot(st, FX, y, 0.9, sx=1 / sq if p >= 1 else 0.9, sy=sq if p >= 1 else 1.12,
                    face="proud" if t > 1.4 else "happy", blink=(2.6 < t < 2.7))
         if t > 1.5:
-            out["bubbles"].append(("أنا XL وفخور بنفسي!", 250, FY - 560, seg(t, 1.5, 1.9), (30, 150)))
+            out["bubbles"].append(("أنا XL ومبسوط بنفسي!", 250, FY - 560, seg(t, 1.5, 1.9), (30, 150)))
     elif t < 4.35:
         # قفزة جوه الغسالة
         p = seg(t, 3.4, 4.3)
@@ -358,7 +361,7 @@ def washer_scene(t):
         if 4.3 <= t < 4.7:
             pass
         if 8.0 < t:
-            out["bubbles"].append(("حر! حر!", 300, 990, seg(t, 8.0, 8.4), (50, 90)))
+            out["bubbles"].append(("آه يا حر! أنا بسخن!", 300, 990, seg(t, 8.0, 8.4), (50, 90)))
     elif t < 15.4:
         # التيشيرت الصغير بيتدحرج ويقع
         p = seg(t, 11.0, 12.1)
@@ -371,7 +374,7 @@ def washer_scene(t):
             mascot(st, x, y, sc, sx=1 / sq if k > 0 else 1, sy=sq if k > 0 else 1, rot=(1 - p) * 8 if p < 1 else 0,
                    face="shock" if t < 13.0 else "pain", sweat=t * 2 if t > 12.2 else 0)
             if t > 12.3:
-                out["bubbles"].append(("أنا كنت XL!! بقيت S؟!", 330, FLOOR - 420, seg(t, 12.3, 12.7), (-20, 150)))
+                out["bubbles"].append(("إيه ده؟! كنت XL وبقيت S!", 330, FLOOR - 420, seg(t, 12.3, 12.7), (-20, 150)))
         else:
             # بيطلع بـ "بوف" ويظهر الأصلي
             p2 = seg(t, 13.9, 14.3)
@@ -380,14 +383,14 @@ def washer_scene(t):
             p3 = seg(t, 14.4, 14.9)
             mascot(st, 262, FLOOR, 0.9 * back(p3), face="proud")
             if t > 15.0:
-                out["bubbles"].append(("على 30 درجة؟ لسه XL!", 270, FLOOR - 560, seg(t, 15.0, 15.4), (30, 150)))
+                out["bubbles"].append(("على 30 لسه XL وزي الفل!", 270, FLOOR - 560, seg(t, 15.0, 15.4), (30, 150)))
     else:
         mascot(st, 262, FLOOR, 0.9, face="proud", blink=(18.2 < t < 18.3))
     out['heat'] = heat
     return st, out, temp
 
 
-SCR = ["تيشيرتك على 90 درجة؟", "الحرارة العالية بتنكّش القطن", "30 درجة كفاية غالبًا", "راجع تكاية تيشيرتك دايمًا"]
+SCR = ["بتغسل تيشيرتك على 90 درجة؟", "المية السخنة بتصغّر القطن", "30 درجة تكفي وزيادة", "اقرا التكاية قبل ما تغسل"]
 
 
 def frame(t):
@@ -406,23 +409,23 @@ def frame(t):
     # عناوين
     if t < 4.3:
         c.block(SCR[0], 1000, 250, 98, 920, t=t, t0=0.3, step=0.28, lh=1.25)
-        v2_pill(c, "حكاية تيشيرت (مشهد كوميدي)", prog(t, 0.0))
+        v2_pill(c, "هزار في هزار", prog(t, 0.0))
     elif t < 12.8:
         c.block(SCR[1], 1000, 250, 98, 920, t=t - 4.3, t0=0.0, step=0.28, lh=1.25) if t < 10.9 else None
-        v2_pill(c, "حكاية تيشيرت (مشهد كوميدي)", 1)
+        v2_pill(c, "هزار في هزار", 1)
         if t >= 10.9:
-            c.block("وكده بقى مقاسك...", 1000, 250, 98, 920, t=t - 10.9, t0=0.0, step=0.28, lh=1.25)
+            c.block("شوف مقاسه بقى إيه...", 1000, 250, 98, 920, t=t - 10.9, t0=0.0, step=0.28, lh=1.25)
     elif t < 16.2:
         c.block(SCR[2], 1000, 250, 98, 920, t=t - 14.0, t0=0.0, step=0.28, lh=1.25) if t >= 14.0 else \
-            c.block("وكده بقى مقاسك...", 1000, 250, 98, 920)
-        v2_pill(c, "حكاية تيشيرت (مشهد كوميدي)", 1)
+            c.block("شوف مقاسه بقى إيه...", 1000, 250, 98, 920)
+        v2_pill(c, "هزار في هزار", 1)
     else:
         # CTA
         ov = Image.new("RGBA", (W, H), (12, 18, 15, int(200 * prog(t, 16.2, 0.5))))
         c.img.alpha_composite(ov)
         y = c.block(SCR[3], 1000, 640, 104, 920, t=t - 16.4, t0=0.0, step=0.3, lh=1.3)
         c.rrect([480, 1100, 1000, 1260], C["card"], 40, alpha=prog(t, 18.0), outline=C["line"])
-        c.text("تابع بسيط", 960, 1135, 76, C["cream"], True, alpha=prog(t, 18.0))
+        c.text("تابعنا على بسيط", 960, 1135, 76, C["cream"], True, alpha=prog(t, 18.0))
     dr = ImageDraw.Draw(c.img)
     dr.rectangle([0, 0, int(W * t / TOTAL), 10], fill=rgb(C["acc"]))
     return c.img.convert("RGB")
