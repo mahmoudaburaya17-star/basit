@@ -42,6 +42,10 @@ def back(p, k=1.7):
     return 1 + (k + 1) * (p - 1) ** 3 + k * (p - 1) ** 2
 
 
+def _c(x):
+    return x if isinstance(x, tuple) else rgb(x)
+
+
 class Stage:
     def __init__(self):
         self.im = Image.new("RGBA", (SW, SH), (0, 0, 0, 0))
@@ -52,37 +56,37 @@ class Stage:
 
     def poly(self, pts, fill, outline=None, width=0):
         q = [self.P(*p) for p in pts]
-        self.d.polygon(q, fill=rgb(fill) if isinstance(fill, str) else fill)
+        self.d.polygon(q, fill=_c(fill) if fill is not None else None)
         if outline:
-            self.d.line(q + [q[0]], fill=rgb(outline), width=int(width * SS), joint="curve")
+            self.d.line(q + [q[0]], fill=_c(outline), width=int(width * SS), joint="curve")
 
     def circ(self, cx, cy, r, fill=None, outline=None, width=0):
         x, y = self.P(cx, cy)
         self.d.ellipse([x - r * SS, y - r * SS, x + r * SS, y + r * SS],
-                       fill=rgb(fill) if isinstance(fill, str) else fill,
-                       outline=rgb(outline) if outline else None, width=int(width * SS))
+                       fill=_c(fill) if fill is not None else None,
+                       outline=_c(outline) if outline else None, width=int(width * SS))
 
     def ell(self, cx, cy, rx, ry, fill=None, outline=None, width=0):
         x, y = self.P(cx, cy)
         self.d.ellipse([x - rx * SS, y - ry * SS, x + rx * SS, y + ry * SS],
-                       fill=rgb(fill) if isinstance(fill, str) else fill,
-                       outline=rgb(outline) if outline else None, width=int(width * SS))
+                       fill=_c(fill) if fill is not None else None,
+                       outline=_c(outline) if outline else None, width=int(width * SS))
 
     def rr(self, x0, y0, x1, y1, r, fill=None, outline=None, width=0):
         a, b = self.P(x0, y0), self.P(x1, y1)
         self.d.rounded_rectangle([a[0], a[1], b[0], b[1]], r * SS,
-                                 fill=rgb(fill) if isinstance(fill, str) else fill,
-                                 outline=rgb(outline) if outline else None, width=int(width * SS))
+                                 fill=_c(fill) if fill is not None else None,
+                                 outline=_c(outline) if outline else None, width=int(width * SS))
 
     def arc(self, cx, cy, rx, ry, a0, a1, color, width):
         x, y = self.P(cx, cy)
-        self.d.arc([x - rx * SS, y - ry * SS, x + rx * SS, y + ry * SS], a0, a1, fill=rgb(color), width=int(width * SS))
+        self.d.arc([x - rx * SS, y - ry * SS, x + rx * SS, y + ry * SS], a0, a1, fill=_c(color), width=int(width * SS))
 
     def line(self, pts, color, width):
-        self.d.line([self.P(*p) for p in pts], fill=rgb(color), width=int(width * SS), joint="curve")
+        self.d.line([self.P(*p) for p in pts], fill=_c(color), width=int(width * SS), joint="curve")
 
     def text(self, s, x, y, size, color, bold=True, anchor="mm"):
-        self.d.text(self.P(x, y), s, font=font(int(size * SS), bold), fill=rgb(color), anchor=anchor, **LANG)
+        self.d.text(self.P(x, y), s, font=font(int(size * SS), bold), fill=_c(color), anchor=anchor, **LANG)
 
     def result(self, extra=None):
         return self.im.resize((W, Y1 - Y0), Image.LANCZOS)
@@ -103,7 +107,7 @@ def xf(pts, cx, cy, s=1.0, sx=1.0, sy=1.0, rot=0.0):
     return out
 
 
-def mascot(st, cx, cy, s=0.75, sx=1.0, sy=1.0, rot=0.0, face="happy", blink=False, sweat=0.0, wave=0.0, tint=None):
+def mascot(st, cx, cy, s=0.75, sx=1.0, sy=1.0, rot=0.0, face="happy", blink=False, sweat=0.0, wave=0.0, tint=None, wrinkle=0.0):
     """cx, cy = منتصف القاعدة. s = المقياس الكلي."""
     body = xf(BODY, cx, cy, s, sx, sy, rot)
     fill = CREAM if not tint else tint
@@ -116,6 +120,15 @@ def mascot(st, cx, cy, s=0.75, sx=1.0, sy=1.0, rot=0.0, face="happy", blink=Fals
     # ياقة
     pts = [T(-55, -170), T(-36, -138), T(0, -126), T(36, -138), T(55, -170)]
     st.line(pts, "#CDBF9C", 12 * s)
+    if wrinkle > 0:
+        import random as _r
+        rr_ = _r.Random(11)
+        for _ in range(9):
+            x = rr_.uniform(-95, 95); y = rr_.uniform(-90, 130)
+            ln = [T(x + dx, y + dy) for dx, dy in ((0, 0), (14, -10), (28, 2), (42, -8))]
+            st.line(ln, (150, 135, 105, int(190 * wrinkle)), 5 * s)
+    if face is None:
+        return body
     # وش
     ex, ey = 46, -28
     for k in (-1, 1):
@@ -436,24 +449,29 @@ def v2_pill(c, txt, p):
     pill(c, txt, W, 195, p)
 
 
-def render(out, total=TOTAL):
-    tmp = out + ".silent.mp4"
-    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", "%dx%d" % (W, H), "-r", str(FPS),
-           "-i", "-", "-c:v", "libx264", "-preset", "medium", "-crf", "21", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", tmp]
-    pr = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-    for i in range(int(total * FPS)):
-        pr.stdin.write(frame(i / FPS).tobytes())
-    pr.stdin.close()
-    pr.wait()
-    ev = [(0.35, sfx_whoosh(0.5), 0.35), (1.0, sfx_thud(), 0.5), (1.05, sfx_boing(), 0.25),
+WASH_EVENTS = [(0.35, sfx_whoosh(0.5), 0.35), (1.0, sfx_thud(), 0.5), (1.05, sfx_boing(), 0.25),
           (1.5, sfx_pop(900), 0.3), (3.4, sfx_whoosh(0.7), 0.4), (4.25, sfx_pop(500), 0.5),
           (4.7, sfx_pop(800), 0.2), (8.0, sfx_pop(1000), 0.3), (10.3, sfx_ding(), 0.5),
           (10.9, sfx_whoosh(0.4), 0.3), (11.0, sfx_slide(1.0), 0.5), (12.1, sfx_thud(), 0.6),
           (12.3, sfx_pop(600), 0.3), (13.9, sfx_pop(1100), 0.5), (14.4, sfx_boing(), 0.3),
           (14.5, sfx_ding(1568), 0.35), (15.0, sfx_pop(900), 0.3), (16.4, sfx_whoosh(0.4, True), 0.2)]
-    hum = (4.6, 5.8, lambda x: 0.0 + 0.5 * clamp((x - 0.0) / 1.0) * (1 if x < 4.2 else 0.8), 0.45)
+WASH_HUM = (4.6, 5.8, lambda x: 0.0 + 0.5 * clamp((x - 0.0) / 1.0) * (1 if x < 4.2 else 0.8), 0.45)
+
+def render(out, total=TOTAL):
+    return render_generic(out, frame, total, WASH_EVENTS, WASH_HUM, 7)
+
+
+def render_generic(out, frame_fn, total, ev, hum, seed):
+    tmp = out + ".silent.mp4"
+    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", "%dx%d" % (W, H), "-r", str(FPS),
+           "-i", "-", "-c:v", "libx264", "-preset", "medium", "-crf", "21", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", tmp]
+    pr = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+    for i in range(int(total * FPS)):
+        pr.stdin.write(frame_fn(i / FPS).tobytes())
+    pr.stdin.close()
+    pr.wait()
     sfx = mix_sfx(total, ev, hum)
-    music = mm.make(total, seed=7)
+    music = mm.make(total, seed=seed)
     mono = music.mean(axis=0) if music.ndim == 2 else music
     mus = np.stack([mono * 0.8, mono * 0.8]) if music.ndim == 2 else music
     s2 = np.stack([sfx, sfx])
